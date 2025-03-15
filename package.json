@@ -16,6 +16,7 @@
     "src/DecentraLearn_frontend"
   ],
   "dependencies": {
+    "@dfinity/auth-client": "^2.3.0",
     "DecentraLearn": "file:"
   }
 }
