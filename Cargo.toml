@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/DecentraLearn_backend"
+]
+resolver = "2"
