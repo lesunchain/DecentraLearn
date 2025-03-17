@@ -1,5 +1,4 @@
 type Course = record {
-    course_id: nat32;
     course_name: text;
     course_topics: vec text;
     course_desc: text;
@@ -7,12 +6,17 @@ type Course = record {
     course_estimated_time_in_hours: nat32;
 };
 
+type CourseEntry = record {
+    course_id: nat32;
+    course: Course;
+};
+
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
-    get_courses: () -> (vec Course) query;
+    get_courses: () -> (vec CourseEntry) query;  // Ensure this matches Rust
     get_course: (nat32) -> (opt Course) query;
-    add_course: (Course) -> ();
+    add_course: (Course) -> (nat32);
     edit_course: (nat32, Course) -> (bool);
-    remove_course: (nat32) -> ();
+    remove_course: (nat32) -> (bool);
 }
