@@ -14,7 +14,7 @@ type CourseEntry = record {
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
-    get_courses: () -> (vec CourseEntry) query;  // Ensure this matches Rust
+    get_courses: () -> (vec CourseEntry) query;
     get_course: (nat32) -> (opt Course) query;
     add_course: (Course) -> (nat32);
     edit_course: (nat32, Course) -> (bool);
