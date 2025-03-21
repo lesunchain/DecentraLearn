@@ -3,3 +3,8 @@ members = [
     "src/DecentraLearn_backend"
 ]
 resolver = "2"
+
+# [patch.crates-io]
+# mio = "0.8.11"
+#
+
