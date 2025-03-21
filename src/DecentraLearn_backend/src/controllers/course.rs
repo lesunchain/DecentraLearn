@@ -18,13 +18,13 @@ pub fn get_courses() -> Vec<CourseEntry> {
     })
 }
 
-// Get course by ID
+// Get a course by ID
 #[ic_cdk::query]
 pub fn get_course(course_id: u32) -> Option<Course> {
     COURSES.with(|courses| courses.borrow().get(&course_id).cloned())
 }
 
-// Add new course
+// Add a new course with auto-incrementing course_id
 #[ic_cdk::update] 
 pub fn add_course(course: Course) -> u32 {
     NEXT_COURSE_ID.with(|next_id| {
@@ -40,7 +40,7 @@ pub fn add_course(course: Course) -> u32 {
     })
 }
 
-// Edit course 
+// Edit an existing course (without changing course_id)
 #[ic_cdk::update] 
 pub fn edit_course(course_id: u32, updated_course: Course) -> bool {
     COURSES.with(|courses| {
@@ -53,7 +53,7 @@ pub fn edit_course(course_id: u32, updated_course: Course) -> bool {
     })
 }
 
-// Delete course
+// Delete a course
 #[ic_cdk::update] 
 pub fn remove_course(course_id: u32) -> bool {
     COURSES.with(|courses| courses.borrow_mut().remove(&course_id).is_some())

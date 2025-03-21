@@ -2,8 +2,8 @@ mod models;
 mod controllers;
 
 use candid::Principal;
-use models::module::Module;
 use models::course::*;
+use controllers::course::*;
 
 #[ic_cdk::query]
 fn greet(name: String) -> String {
