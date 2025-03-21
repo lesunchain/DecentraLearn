@@ -11,6 +11,18 @@ type CourseEntry = record {
     course: Course;
 };
 
+type Chapter = record {
+    course_id: nat32;
+    chapter_name: text;
+    chapter_number: nat32;
+    chapter_file_link: text;
+};
+
+type ChapterEntry = record {
+    chapter_id: nat32;
+    chapter: Chapter;
+};
+
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
@@ -19,4 +31,12 @@ service : {
     add_course: (Course) -> (nat32);
     edit_course: (nat32, Course) -> (bool);
     remove_course: (nat32) -> (bool);
+
+        // Chapter Functions
+    get_chapters: () -> (vec ChapterEntry) query;
+    get_chapters_by_course: (nat32) -> (vec record { chapter_id: nat32; chapter: Chapter }) query;
+    get_chapter: (nat32) -> (opt Chapter) query;
+    add_chapter: (nat32, text, nat32, text) -> (nat32);
+    edit_chapter: (nat32, Chapter) -> (bool);
+    remove_chapter: (nat32) -> (bool);
 }
