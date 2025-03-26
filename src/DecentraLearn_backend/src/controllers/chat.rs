@@ -1,7 +1,8 @@
+//src/controllers/chat.rs
 use ic_llm::{Model, ChatMessage, Role};
 
-#[tokio::main]
-async fn main() {
+// #[tokio::main]
+pub async fn main() {
     let response = ic_llm::chat(
         Model::Llama3_1_8B,
         vec![

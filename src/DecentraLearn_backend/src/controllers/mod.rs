@@ -1,2 +1,2 @@
 pub mod course;
-pub mod canister;
+pub mod chat;
