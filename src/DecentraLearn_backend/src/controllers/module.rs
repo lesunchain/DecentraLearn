@@ -6,6 +6,7 @@ use crate::models::module::Module;
 thread_local! {
     static MODULES: RefCell<HashMap<u32, Module>> = RefCell::new(HashMap::new());
     static COURSE_MODULES: RefCell<HashMap<u32, Vec<u32>>> = RefCell::new(HashMap::new());
+    static NEXT_MODULE_ID: RefCell<u32> = RefCell::new(1);
 }
 
 // Create a new module
@@ -58,4 +59,36 @@ pub fn get_course_modules(course_id: u32) -> Vec<Module> {
     // Sort by order
     modules.sort_by(|a, b| a.order.cmp(&b.order));
     modules
+}
+
+#[ic_cdk::query]
+pub fn get_module_count(course_id: u32) -> Option<u32> {
+    COURSE_MODULES.with(|course_modules| {
+        course_modules.borrow()
+            .get(&course_id)
+            .map(|module_ids| module_ids.len() as u32)
+    })
+}
+
+#[ic_cdk::update]
+pub fn add_module(course_id: u32, title: String, description: String, order: u32, content: String) -> u32 {
+    NEXT_MODULE_ID.with(|next_id| {
+        let id = *next_id.borrow();
+        
+        let new_module = Module {
+            id,
+            course_id,
+            title,
+            description,
+            order,
+            content,
+        };
+        
+        create_module(new_module);
+        
+        let mut next_id_value = next_id.borrow_mut();
+        *next_id_value += 1;
+        
+        id
+    })
 }

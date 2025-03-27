@@ -3,7 +3,10 @@ mod controllers;
 
 use candid::Principal;
 use models::course::*;
+use models::module::Module;  // Add this line
 use controllers::course::*;
+use controllers::module::*;
+use controllers::progress::*;
 
 #[ic_cdk::query]
 fn greet(name: String) -> String {
