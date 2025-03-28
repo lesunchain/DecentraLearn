@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
+import tailwindcss from "@tailwindcss/vite";
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '../../.env' });
@@ -26,6 +27,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     react(),
     environment("all", { prefix: "CANISTER_" }),
     environment("all", { prefix: "DFX_" }),
