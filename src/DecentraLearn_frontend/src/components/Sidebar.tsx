@@ -90,7 +90,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
     <>
       {/* Mobile Sidebar Toggle */}
       <aside className="fixed inset-y-0 left-0 z-50 flex flex-col items-center w-[60px] border-r bg-background lg:hidden py-4 gap-y-4">
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/my-courses">
@@ -100,7 +100,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Course Library</p>
+              <p className="text-black">Course Library</p>
             </TooltipContent>
           </Tooltip>
 
@@ -116,7 +116,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Toggle Sidebar</p>
+              <p className="text-black">Toggle Sidebar</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

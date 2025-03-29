@@ -18,7 +18,6 @@ export default function ModuleForm({ onSubmit, onCancel }: ModuleFormProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    pdf: "",
     order: 1,
   })
 
@@ -70,20 +69,6 @@ export default function ModuleForm({ onSubmit, onCancel }: ModuleFormProps) {
           onChange={handleChange}
           required
           className="min-h-20 bg-background/50 border-border text-white"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="pdf" className="text-white">PDF File</Label>
-        <Input
-          id="pdf"
-          name="pdf"
-          type="file"
-          accept=".pdf"
-          value={formData.pdf}
-          onChange={handleChange}
-          required
-          className="bg-background/50 border-border text-white h-8"
         />
       </div>
 

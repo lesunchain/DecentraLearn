@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { DecentraLearn_backend } from "./../../../declarations/DecentraLearn_backend";
 
 interface Message {
     sender: "user" | "bot";
@@ -11,6 +12,7 @@ export default function Chatbot() {
     ]);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -20,19 +22,34 @@ export default function Chatbot() {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = () => {
-        // Rest of your code remains the same
-        if (!input.trim()) return;
+    const askAgent = async (msg: string) => {
+        try {
+            const response = await DecentraLearn_backend.chat([{ role: "user", content: msg }]);
+            setMessages((prevChat) => [
+                ...prevChat.slice(0, -1), // Remove "Thinking..." message
+                { sender: "bot", text: response },
+            ]);
+        } catch (e) {
+            console.log(e);
+            alert("An error occurred. Please try again.");
+            setMessages((prevChat) => prevChat.slice(0, -1)); // Remove "Thinking..."
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        const newMessages = [...messages, { sender: "user" as const, text: input }];
-        setMessages(newMessages);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        const userMessage: Message = { sender: "user", text: input };
+        const thinkingMessage: Message = { sender: "bot", text: "Thinking..." };
+
+        setMessages((prevChat) => [...prevChat, userMessage, thinkingMessage]);
         setInput("");
+        setIsLoading(true);
 
-        // Simulate bot response
-        setTimeout(() => {
-            const botReply = "I'm just a bot, but I can help you with your questions!";
-            setMessages([...newMessages, { sender: "bot" as const, text: botReply }]);
-        }, 1000);
+        askAgent(input);
     };
 
     return (
@@ -42,11 +59,10 @@ export default function Chatbot() {
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`max-w-[80%] p-3 rounded-lg ${
-                            msg.sender === "user"
+                        className={`max-w-[80%] p-3 rounded-lg ${msg.sender === "user"
                                 ? "ml-auto bg-black text-white"
                                 : "bg-gray-100 text-gray-800"
-                        }`}
+                            }`}
                     >
                         {msg.text}
                     </div>
@@ -54,7 +70,7 @@ export default function Chatbot() {
                 <div ref={messagesEndRef} /> {/* Empty div as anchor for scrolling */}
             </div>
 
-            {/* Input Field remains the same */}
+            {/* Input Field */}
             <div className="flex items-center border-t pt-3 mt-3">
                 <input
                     type="text"
@@ -62,11 +78,13 @@ export default function Chatbot() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-1 p-2 border rounded-lg outline-none text-black"
-                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
+                    disabled={isLoading}
                 />
                 <button
-                    onClick={handleSend}
-                    className="ml-2 p-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                    onClick={handleSubmit}
+                    className="ml-2 p-2 bg-gray-300 rounded-lg hover:bg-gray-400 disabled:opacity-50"
+                    disabled={isLoading}
                 >
                     🚀
                 </button>

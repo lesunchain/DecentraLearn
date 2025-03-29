@@ -13,6 +13,11 @@ type CourseEntry = record {
 
 type CourseTopic = variant { Technology; Business; Design; Marketing; Development; Other };
 
+type ChatMessage = record {
+    role: text;
+    content: text;
+};
+
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
@@ -21,4 +26,6 @@ service : {
     add_course: (Course) -> (nat32);
     edit_course: (nat32, Course) -> (bool);
     remove_course: (nat32) -> (bool);
+    prompt: (text) -> (text);
+    chat: (vec ChatMessage) -> (text);
 }
