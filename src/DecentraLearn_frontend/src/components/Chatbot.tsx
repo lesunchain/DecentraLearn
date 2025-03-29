@@ -24,7 +24,7 @@ export default function Chatbot() {
 
     const askAgent = async (msg: string) => {
         try {
-            const response = await DecentraLearn_backend.chat([{ role: "user", content: msg }]);
+            const response = await DecentraLearn_backend.prompt(msg);
             setMessages((prevChat) => [
                 ...prevChat.slice(0, -1), // Remove "Thinking..." message
                 { sender: "bot", text: response },
@@ -60,8 +60,8 @@ export default function Chatbot() {
                     <div
                         key={index}
                         className={`max-w-[80%] p-3 rounded-lg ${msg.sender === "user"
-                                ? "ml-auto bg-black text-white"
-                                : "bg-gray-100 text-gray-800"
+                            ? "ml-auto bg-black text-white"
+                            : "bg-gray-100 text-gray-800"
                             }`}
                     >
                         {msg.text}
