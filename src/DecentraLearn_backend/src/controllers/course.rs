@@ -24,6 +24,17 @@ pub fn get_course(course_id: u32) -> Option<Course> {
     COURSES.with(|courses| courses.borrow().get(&course_id).cloned())
 }
 
+// Get a course by slug
+#[ic_cdk::query]
+pub fn get_course_by_slug(slug: String) -> Option<Course> {
+    COURSES.with(|courses| {
+        courses.borrow()
+            .values()
+            .find(|course| course.course_slug == slug)
+            .cloned()
+    })
+}
+
 // Add a new course with auto-incrementing course_id
 #[ic_cdk::update] 
 pub fn add_course(course: Course) -> u32 {
