@@ -1,5 +1,9 @@
-function About() {
-    return <h1>About Page</h1>;
+import { Navigate } from "react-router-dom"
+
+// This component redirects to the admin dashboard
+function Admin() {
+  return <Navigate to="/admin/dashboard" replace />
 }
 
-export default About;
+export default Admin
+

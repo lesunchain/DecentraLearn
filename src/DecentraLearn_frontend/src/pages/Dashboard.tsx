@@ -9,12 +9,6 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <Link to="/admin/courses">
-          <Button className="flex items-center gap-2 text-white" variant="outline">
-            <PlusCircle className="h-4 w-4" />
-            <span>New Course</span>
-          </Button>
-        </Link>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
