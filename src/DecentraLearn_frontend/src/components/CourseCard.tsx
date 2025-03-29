@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { BookOpen, UserIcon } from "lucide-react";
 import { Loader } from "./Loader";
 import { CourseProgress } from "./CourseProgress";
 
@@ -15,7 +15,6 @@ interface Course {
         name: string;
     };
     instructor: {
-        photo: string;
         name: string;
     };
 }
@@ -64,19 +63,9 @@ export function CourseCard({ course, progress, href }: CourseCardProps) {
                         {course.instructor && (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    {course.instructor.photo ? (
-                                        <div className="relative h-8 w-8 mr-2">
-                                            <img
-                                                src={course.instructor.photo || ""}
-                                                alt={course.instructor.name || "Instructor"}
-                                                className="rounded-full object-cover w-full h-full"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="h-8 w-8 mr-2 rounded-full bg-muted flex items-center justify-center">
-                                            <Loader size="sm" />
-                                        </div>
-                                    )}
+                                    <div className="h-8 w-8 mr-2 rounded-full bg-black flex items-center justify-center">
+                                        <UserIcon className="h-5 w-5" />
+                                    </div>
                                     <span className="text-sm text-muted-foreground">
                                         by {course.instructor.name}
                                     </span>

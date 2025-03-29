@@ -15,6 +15,7 @@ export default function Home({ isAuthenticated, login }: LoginProps): JSX.Elemen
       navigate("/explore"); // Redirect to explore if already logged in
     } else {
       login(); // Trigger Internet Identity login
+      navigate("/explore"); // Redirect to explore after login
     }
   };
 

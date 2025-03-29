@@ -5,10 +5,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTransition } from "react";
 
 function EnrollButton({
-    courseId,
+    slug,
+    lessonId,
     isEnrolled,
 }: {
-    courseId: number;
+    slug: string;
+    lessonId: number;
     isEnrolled: boolean;
 }) {
     // Replace hardcoded user data with API
@@ -19,14 +21,11 @@ function EnrollButton({
     // const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
-    const handleEnroll = async (courseId: number) => {
+    const handleEnroll = async (slug: string) => {
         try {
             const userId = user.id;
-            console.log(`Enrolling user ${userId} in course ${courseId}`);
+            console.log(`Enrolling user ${userId} in course ${slug}`);
             // Your enrollment logic here
-            
-            // Uncomment when ready to implement:
-            // const { url } = await createStripeCheckout(courseId, userId);
             
             startTransition(() => {
                 // UI updates after async operation completes
@@ -52,7 +51,7 @@ function EnrollButton({
     if (isEnrolled) {
         return (
             <Link
-                to={`/dashboard/courses/${courseId}`}
+                to={`/learn/${slug}/${lessonId}`}
                 className="w-full rounded-lg px-6 py-3 font-medium bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 h-12 flex items-center justify-center gap-2 group"
             >
                 <span>Access Course</span>
@@ -71,7 +70,7 @@ function EnrollButton({
                 }
             `}
             disabled={!user.id || isPending}
-            onClick={() => handleEnroll(courseId)}
+            onClick={() => handleEnroll(slug)}
         >
             {!user.id ? (
                 <span className={`${isPending ? "opacity-0" : "opacity-100"}`}>

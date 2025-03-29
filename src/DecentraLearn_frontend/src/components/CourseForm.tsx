@@ -111,21 +111,6 @@ export default function CourseForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slug">URL Slug</Label>
-            <Input
-              id="slug"
-              name="slug"
-              placeholder="e.g. intro-to-blockchain"
-              value={formData.slug}
-              onChange={handleChange}
-              required
-              className="bg-background border-border text-white"
-            />
-            <p className="text-xs text-muted-foreground">This will be used in the course URL</p>
-          </div>
-        </div>
-
-        <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
           <Select value={formData.category} onValueChange={handleSelectChange} required>
             <SelectTrigger className="bg-background border-border text-white">
@@ -140,6 +125,7 @@ export default function CourseForm() {
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+        </div>
         </div>
 
         <div className="space-y-2">

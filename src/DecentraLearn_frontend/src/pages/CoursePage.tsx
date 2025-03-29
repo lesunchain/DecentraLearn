@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, UserIcon } from "lucide-react";
 import EnrollButton from "../components/EnrollButton";
 import { useParams } from "react-router-dom";
 
@@ -13,7 +13,6 @@ export default function CoursePage() {
             description: "Learn the fundamentals of blockchain technology",
             category: { name: "Technology" },
             instructor: {
-                photo: "/images/instructor-john.jpg",
                 name: "John Doe",
                 bio: "Blockchain expert with 10+ years of experience"
             },
@@ -46,7 +45,6 @@ export default function CoursePage() {
             description: "Build decentralized apps with Ethereum",
             category: { name: "Development" },
             instructor: {
-                photo: "/images/instructor-jane.jpg",
                 name: "Jane Smith",
                 bio: "Full-stack Web3 developer and educator"
             },
@@ -133,7 +131,7 @@ export default function CoursePage() {
                             </p>
                         </div>
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 md:min-w-[300px]">
-                            <EnrollButton courseId={course._id} isEnrolled={isEnrolled} />
+                            <EnrollButton slug={course.slug} lessonId={1} isEnrolled={isEnrolled} />
                         </div>
                     </div>
                 </div>
@@ -185,20 +183,14 @@ export default function CoursePage() {
 
                     {/* Sidebar */}
                     <div>
-                        <div className="bg-card rounded-lg p-6 sticky top-4 border border-border text-black">
+                        <div className="bg-card rounded-lg p-6 sticky top-20 border border-border text-black">
                             <h2 className="text-xl font-bold mb-4">Instructor</h2>
                             {course.instructor && (
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
-                                        {course.instructor.photo && (
-                                            <div className="relative h-12 w-12">
-                                                <img
-                                                    src={course.instructor.photo || ""}
-                                                    alt={course.instructor.name || "Course Instructor"}
-                                                    className="rounded-full object-cover w-full h-full"
-                                                />
+                                            <div className="relative h-12 w-12 flex items-center justify-center">
+                                                <UserIcon className="h-8 w-8" />
                                             </div>
-                                        )}
                                         <div>
                                             <div className="font-medium">
                                                 {course.instructor.name}

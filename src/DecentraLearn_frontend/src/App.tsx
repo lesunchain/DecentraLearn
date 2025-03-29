@@ -12,6 +12,10 @@ import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCourses from "./pages/AdminCourses";
 import AdminModules from "./pages/AdminModules";
+import MyCoursesPage from "./pages/MyCoursesPage";
+import LearnLayout from "./pages/LearnLayout";
+import CourseLayout from "./pages/CourseLayout";
+import LessonPage from "./pages/LessonPage";
 
 const network = import.meta.env.DFX_NETWORK;
 const identityProvider =
@@ -57,7 +61,7 @@ function App() {
 
 function MainContent({ isAuthenticated, login, logout }: { isAuthenticated: boolean; login: () => void; logout: () => void }) {
   const location = useLocation();
-  const showNavbar = location.pathname.startsWith("/explore") || location.pathname.startsWith("/search") || location.pathname.startsWith("/course");
+  const showNavbar = location.pathname === "/explore" || location.pathname.startsWith("/search") || location.pathname.startsWith("/course") || location.pathname === "/my-courses";
 
   return (
     <>
@@ -68,6 +72,13 @@ function MainContent({ isAuthenticated, login, logout }: { isAuthenticated: bool
           <Route path="/explore" element={<Explore />} />
           <Route path="/search/:term" element={<SearchPage />} />
           <Route path="/course/:slug" element={<CoursePage />} />
+          <Route path="/my-courses" element={<MyCoursesPage />} />
+
+          <Route path="/learn" element={<LearnLayout />} >
+            <Route path=":slug" element={<CourseLayout isAuthenticated={isAuthenticated} login={login} />} >
+              <Route path=":lessonId" element={<LessonPage />} />
+            </Route>
+          </Route>
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
