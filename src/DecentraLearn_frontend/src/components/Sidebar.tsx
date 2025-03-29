@@ -17,7 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useSidebar } from "../components/SidebarProvider";
+import { useSidebar } from "./SidebarProvider";
 import {
   Tooltip,
   TooltipContent,

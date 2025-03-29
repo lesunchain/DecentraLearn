@@ -13,6 +13,30 @@ type CourseEntry = record {
 
 type CourseTopic = variant { Technology; Business; Design; Marketing; Development; Other };
 
+type Module = record {
+    title: text;
+    description: text;
+    order: nat32;
+    course_id: nat32;
+};
+
+type ModuleEntry = record {
+    module_id: nat32;
+    module: Module;
+};
+
+type Lesson = record {
+    title: text;
+    description: text;
+    pdf_file: text;
+    module_id: nat32;
+};
+
+type LessonEntry = record {
+    lesson_id: nat32;
+    lesson: Lesson;
+};
+
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
@@ -22,4 +46,18 @@ service : {
     add_course: (Course) -> (nat32);
     edit_course: (nat32, Course) -> (bool);
     remove_course: (nat32) -> (bool);
+    get_modules: () -> (vec ModuleEntry) query;
+    get_course_modules: (nat32) -> (vec ModuleEntry) query;
+    get_module: (nat32) -> (opt Module) query;
+    add_module: (Module) -> (nat32);
+    edit_module: (nat32, Module) -> (bool);
+    remove_module: (nat32) -> (bool);
+    get_module_count: (nat32) -> (nat32) query;
+    get_lessons: () -> (vec LessonEntry) query;
+    get_module_lessons: (nat32) -> (vec LessonEntry) query;
+    get_lesson: (nat32) -> (opt Lesson) query;
+    add_lesson: (Lesson) -> (nat32);
+    edit_lesson: (nat32, Lesson) -> (bool);
+    remove_lesson: (nat32) -> (bool);
+    get_lesson_count: (nat32) -> (nat32) query;
 }
