@@ -27,15 +27,19 @@
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
     },
     "llm": {
-      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
+      "candid": "src/llm/llm-canister-ollama.did",
       "type": "custom",
-      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
       "remote": {
         "id": {
           "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
         }
       },
-      "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm"
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ],
+      "wasm": "src/llm/llm-canister-ollama.wasm"
     }
   },
   "defaults": {

@@ -1,0 +1,20 @@
+type role = variant {
+  assistant;
+  system;
+  user;
+};
+
+type chat_message = record {
+  role: role;
+  content: text;
+};
+
+type chat_request = record {
+  // Valid values: "llama3.1:8b"
+  model: text;
+  messages: vec chat_message;
+};
+
+service: {
+  v0_chat: (chat_request) -> (text);
+}
