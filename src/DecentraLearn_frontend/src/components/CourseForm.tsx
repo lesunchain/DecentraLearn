@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Upload } from "lucide-react"
+import { getBackendActor } from "../lib/backend";
+
 
 export default function CourseForm() {
   const navigate = useNavigate()
@@ -72,26 +74,32 @@ export default function CourseForm() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
+    e.preventDefault();
+    setIsLoading(true);
+  
     try {
-      // In a real app, you'd send this data to your API
-      console.log("Submitting course:", formData)
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Navigate to the modules page for this course
-      // In a real app, you'd get the ID from the API response
-      const mockId = Date.now().toString()
-      navigate(`/admin/courses/${mockId}/modules`)
+      const actor = await getBackendActor();
+  
+      const result = await actor.add_course({
+        course_name: formData.title,
+        course_desc: formData.description,
+          course_category: formData.category,
+        course_slug: formData.slug,
+        course_image_link: imagePreview || "", // fallback in case preview is missing
+        course_estimated_time_in_hours: 5, // you can add a separate input if needed
+        course_topics: [formData.category],
+      });
+  
+      console.log("Course created with ID:", result);
+      navigate(`/admin/courses/${result}/modules`);
     } catch (error) {
-      console.error("Error creating course:", error)
+      console.error("Error creating course:", error);
+      alert("Failed to create course");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

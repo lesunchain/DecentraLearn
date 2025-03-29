@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import EnrollButton from "../components/EnrollButton";
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function CoursePage() {
-    const courses = [
+    const [courses, setCourses] = useState([
         {
-            _id: 1, // Required for key prop
-            slug: "blockchain-basics", // Required for URL
+            _id: 1, 
+            slug: "blockchain-basics",
             image: "/images/blockchain.jpg",
             title: "Blockchain Basics",
             description: "Learn the fundamentals of blockchain technology",
@@ -68,9 +69,24 @@ export default function CoursePage() {
                         { _id: 2005, title: "Testing and Deployment" }
                     ]
                 }
+                
             ]
         },
-    ];
+    ]);
+
+    useEffect(() => {
+        async function fetchCourses() {
+            try {
+                const response = await fetch("https://your-backend-api.com/courses");
+                const backendCourses = await response.json();
+                setCourses((prevCourses) => [...prevCourses, ...backendCourses]);
+            } catch (error) {
+                console.error("Error fetching courses from backend:", error);
+            }
+        }
+
+        fetchCourses();
+    }, []);
 
     const { slug } = useParams();
     const userId = "2"; // Mock user ID

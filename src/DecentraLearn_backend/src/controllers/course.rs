@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use crate::models::course::{Course, CourseEntry};
+use crate::models::course::CourseInput;
 
 thread_local! {
     static COURSES: RefCell<HashMap<u32, Course>> = RefCell::new(HashMap::new());
@@ -25,12 +26,25 @@ pub fn get_course(course_id: u32) -> Option<Course> {
 }
 
 // Add a new course with auto-incrementing course_id
-#[ic_cdk::update] 
-pub fn add_course(course: Course) -> u32 {
+#[ic_cdk::update]
+pub fn add_course(course_input: CourseInput) -> u32 {
+    let creator = ic_cdk::caller();
+
+    let course = Course {
+        creator,
+        course_name: course_input.course_name,
+        course_topics: course_input.course_topics,
+        course_category: course_input.course_category,
+        course_slug: course_input.course_slug,
+        course_desc: course_input.course_desc,
+        course_image_link: course_input.course_image_link,
+        course_estimated_time_in_hours: course_input.course_estimated_time_in_hours,
+    };
+
     NEXT_COURSE_ID.with(|next_id| {
         let mut next_id = next_id.borrow_mut();
         let course_id = *next_id;
-        
+
         COURSES.with(|courses| {
             courses.borrow_mut().insert(course_id, course);
         });
@@ -39,6 +53,7 @@ pub fn add_course(course: Course) -> u32 {
         course_id
     })
 }
+
 
 // Edit an existing course (without changing course_id)
 #[ic_cdk::update] 
@@ -58,3 +73,30 @@ pub fn edit_course(course_id: u32, updated_course: Course) -> bool {
 pub fn remove_course(course_id: u32) -> bool {
     COURSES.with(|courses| courses.borrow_mut().remove(&course_id).is_some())
 }
+
+
+#[ic_cdk::query]
+pub fn get_my_courses() -> Vec<CourseEntry> {
+    let me = ic_cdk::caller();
+
+    COURSES.with(|courses| {
+        courses.borrow()
+            .iter()
+            .filter_map(|(&id, course)| {
+                if course.creator == me {
+                    Some(CourseEntry {
+                        course_id: id,
+                        course: course.clone(),
+                    })
+                } else {
+                    None
+                }
+            })
+            .collect()
+    })
+}
+
+
+
+
+
