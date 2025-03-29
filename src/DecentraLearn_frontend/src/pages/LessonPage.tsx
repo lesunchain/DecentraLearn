@@ -22,7 +22,7 @@ export default function LessonPage() {
     title: "Introduction to Blockchain",
     description:
       "Learn the basics of blockchain technology, including decentralization and cryptographic security.",
-    pdf: "/documents/blockchain_intro.pdf", // Path to the PDF
+    pdf: "/blockchain.pdf", // Path to the PDF
   };
 
   // Redirect if lesson is not found

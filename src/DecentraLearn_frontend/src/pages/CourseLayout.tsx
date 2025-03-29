@@ -60,6 +60,15 @@ export default function CourseLayout({ isAuthenticated, login }: CourseLayoutPro
           { _id: "lesson-202", title: "Consensus Mechanisms" },
         ],
       },
+      {
+        _id: "module-3",
+        title: "Advanced Blockchain Concepts",
+        lessons: [
+          { _id: "lesson-301", title: "Smart Contracts" },
+          { _id: "lesson-302", title: "Decentralized Applications (DApps)" },
+          { _id: "lesson-303", title: "Blockchain Scalability" },
+        ],
+      },
     ],
   };
 
@@ -67,6 +76,7 @@ export default function CourseLayout({ isAuthenticated, login }: CourseLayoutPro
   const progress: CompletedLesson[] = [
     { lesson: { _id: "lesson-101" } }, // User completed "What is Blockchain?"
     { lesson: { _id: "lesson-102" } }, // User completed "History of Blockchain"
+    { lesson: { _id: "lesson-201" } }, // User completed "Blocks & Hashes"
   ];
 
   // If user is not authenticated, redirect to login

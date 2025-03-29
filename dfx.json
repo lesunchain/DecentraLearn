@@ -1,6 +1,9 @@
 {
   "canisters": {
     "DecentraLearn_backend": {
+      "dependencies": [
+        "llm"
+      ],
       "candid": "src/DecentraLearn_backend/DecentraLearn_backend.did",
       "package": "DecentraLearn_backend",
       "type": "rust"
