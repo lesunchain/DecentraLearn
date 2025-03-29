@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Upload } from "lucide-react"
+import { DecentraLearn_backend } from "./../../../declarations/DecentraLearn_backend"
 
 export default function CourseForm() {
   const navigate = useNavigate()
@@ -76,6 +77,33 @@ export default function CourseForm() {
     setIsLoading(true)
 
     try {
+
+      // Convert category string into CourseTopic variant (ICP uses variants)
+      const courseTopic = (() => {
+        switch (formData.category.toLowerCase()) {
+          case "technology": return { Technology: null };
+          case "business": return { Business: null };
+          case "design": return { Design: null };
+          case "marketing": return { Marketing: null };
+          case "development": return { Development: null };
+          default: return { Other: null };
+        }
+      })();
+
+      // Prepare course data for backend
+      const courseData = {
+        course_name: formData.title,
+        course_topics: [courseTopic], // `vec` in ICP means an array in TypeScript
+        course_desc: formData.description,
+        course_image_link: formData.image ? URL.createObjectURL(formData.image) : "",
+        course_estimated_time_in_hours: 5, // Default estimated time (change as needed)
+      };
+
+      // Call the backend function
+      const resp = await DecentraLearn_backend.add_course(courseData);
+
+      console.log("Backend response (new course ID):", resp);
+      
       // In a real app, you'd send this data to your API
       console.log("Submitting course:", formData)
 
