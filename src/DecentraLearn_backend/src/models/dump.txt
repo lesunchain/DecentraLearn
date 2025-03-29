@@ -1,0 +1,356 @@
+// use anyhow::Result;
+// use lopdf::Document;
+// use std::collections::HashMap;
+// use uuid::Uuid;
+// use std::fs::File;
+// use std::io::Write;
+
+
+
+// /// Embedding model that generates vector representations of text
+// pub struct EmbeddingModel {
+//     word_embeddings: HashMap<String, Vec<f32>>,
+// }
+
+// impl EmbeddingModel {
+//     /// Creates a new embedding model with preloaded word embeddings
+//     pub fn new() -> Result<Self> {
+//         let word_embeddings = Self::load_word_embeddings()?;
+//         Ok(Self { word_embeddings })
+//     }
+
+//     /// Loads a predefined set of word embeddings (simulated)
+//     fn load_word_embeddings() -> Result<HashMap<String, Vec<f32>>> {
+//         let mut embeddings = HashMap::new();
+//         embeddings.insert("hello".to_string(), vec![0.1, 0.2, 0.3, 0.4, 0.5]);
+//         embeddings.insert("world".to_string(), vec![0.4, 0.5, 0.6, 0.7, 0.8]);
+//         embeddings.insert("rust".to_string(), vec![0.3, 0.6, 0.1, 0.9, 0.7]);
+//         embeddings.insert("language".to_string(), vec![0.8, 0.3, 0.4, 0.6, 0.2]);
+//         Ok(embeddings)
+//     }
+
+//     /// Generates an embedding for a given text
+//     pub fn embed(&self, text: &str) -> Result<Vec<f32>> {
+//         let tokens: Vec<String> = text.split_whitespace().map(|t| t.to_lowercase()).collect();
+//         let embeddings: Vec<Vec<f32>> = tokens
+//             .iter()
+//             .filter_map(|token| self.word_embeddings.get(token))
+//             .cloned()
+//             .collect();
+
+//         if embeddings.is_empty() {
+//             return Ok(vec![0.0, 0.0, 0.0, 0.0, 0.5]); // Default embedding if no words match
+//         }
+
+//         let embedding_dim = embeddings[0].len();
+//         let avg_embedding: Vec<f32> = (0..embedding_dim)
+//             .map(|i| embeddings.iter().map(|vec| vec[i]).sum::<f32>() / embeddings.len() as f32)
+//             .collect();
+
+//         Ok(avg_embedding)
+//     }
+
+//     /// Extracts text from a PDF file
+//     pub fn extract_text_from_pdf(pdf_path: &str) -> Result<String> {
+//         let doc = Document::load(pdf_path)?;
+//         let mut text = String::new();
+        
+//         for page_id in doc.get_pages().keys() {
+//             if let Ok(content) = doc.extract_text(&[*page_id]) {
+//                 text.push_str(&content);
+//                 text.push('\n');
+//             }
+//         }
+
+//         println!("📄 Extracted text from PDF: {}", text);
+//         Ok(text)
+//     }
+// }
+
+// /// Simple in-memory vector database for storing document embeddings
+// pub struct VectorStore {
+//     documents: HashMap<String, Vec<f32>>,
+// }
+
+// impl VectorStore {
+//     /// Creates a new empty VectorStore
+//     pub fn new() -> Self {
+//         Self {
+//             documents: HashMap::new(),
+//         }
+//     }
+
+//     /// Adds a document embedding to the vector store and returns its unique ID
+//     pub fn add_document(&mut self, embedding: Vec<f32>) -> String {
+//         let id = Uuid::new_v4().to_string();
+//         self.documents.insert(id.clone(), embedding);
+//         id
+//     }
+
+//     /// Retrieves a vector by document ID
+//     pub fn get_vector(&self, doc_id: &str) -> Option<&Vec<f32>> {
+//         self.documents.get(doc_id)
+//     }
+
+//     /// Adds a PDF file to the vector store by extracting its text and embedding it
+//     pub fn add_pdf_to_vectorstore(&mut self, model: &EmbeddingModel, pdf_path: &str) -> Result<String> {
+//         let extracted_text = EmbeddingModel::extract_text_from_pdf(pdf_path)?;
+//         let embedding = model.embed(&extracted_text)?;
+//         let doc_id = self.add_document(embedding);
+
+//         println!("✅ Stored document {} in VectorStore.", doc_id);
+//         Ok(doc_id)
+//     }
+
+//     /// Prints all stored vectors in the database
+//     pub fn print_all_vectors(&self) {
+//         println!("📌 Vector Database Contents:");
+//         for (doc_id, vector) in &self.documents {
+//             println!("🆔 ID: {}\n🔢 Vector: {:?}", doc_id, vector);
+//         }
+//     }
+
+//     pub fn save_vectors_to_csv(&self, filename: &str) -> Result<()> {
+//         let mut file = File::create(filename)?;
+
+//         // Write CSV Header
+//         writeln!(file, "id,dim1,dim2,dim3,dim4,dim5")?;
+
+//         // Write vector data
+//         for (id, vector) in &self.documents {
+//             let vector_str = vector.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",");
+//             writeln!(file, "{},{}", id, vector_str)?;
+//         }
+
+//         println!("✅ Saved vectors to {}", filename);
+//         Ok(())
+//     }
+// }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use std::fs::File;
+//     use std::io::Write;
+
+//     #[test]
+//     fn test_embedding_generation() -> Result<()> {
+//         let model = EmbeddingModel::new()?;
+//         let embedding = model.embed("Hello world")?;
+
+//         println!("Generated embedding: {:?}", embedding);
+
+//         assert_eq!(embedding.len(), 5);
+//         Ok(())
+//     }
+
+//     #[test]
+//     fn test_pdf_extraction() -> Result<()> {
+//         let pdf_path = "/home/kyomoto/Downloads/rag.pdf";
+//         let extracted_text = EmbeddingModel::extract_text_from_pdf(pdf_path);
+
+//         match extracted_text {
+//             Ok(text) => {
+//                 println!("Extracted text: {}", text);
+//                 assert!(!text.is_empty(), "Extracted text should not be empty");
+//             },
+//             Err(e) => panic!("PDF extraction failed: {:?}", e),
+//         }
+        
+//         Ok(())
+//     }
+
+//     #[test]
+//     fn test_pdf_to_vectorstore() -> Result<()> {
+//         let pdf_path = "/home/kyomoto/Downloads/rag.pdf";
+//         let model = EmbeddingModel::new()?;
+//         let mut vector_store = VectorStore::new();
+
+//         let doc_id = vector_store.add_pdf_to_vectorstore(&model, pdf_path)?;
+        
+//         if let Some(vector) = vector_store.get_vector(&doc_id) {
+//             println!("✅ Retrieved vector for document {}: {:?}", doc_id, vector);
+//         } else {
+//             println!("❌ Vector not found!");
+//         }
+
+//         vector_store.print_all_vectors();
+//         vector_store.save_vectors_to_csv("vectors.csv")?;
+//         assert!(vector_store.get_vector(&doc_id).is_some(), "Vector should be stored in database");
+//         Ok(())
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// use anyhow::Result;
+// use lopdf::Document;
+// use std::collections::HashMap;
+// use std::fs::File;
+// use std::io::Write;
+// use uuid::Uuid;
+// use itertools::Itertools;
+
+
+// /// Embedding model that generates vector representations of text
+// pub struct EmbeddingModel {
+//     word_embeddings: HashMap<String, Vec<f32>>,
+// }
+
+// impl EmbeddingModel {
+//     /// Creates a new embedding model with preloaded word embeddings
+//     pub fn new() -> Result<Self> {
+//         let word_embeddings = Self::load_word_embeddings()?;
+//         Ok(Self { word_embeddings })
+//     }
+
+//     /// Loads predefined word embeddings
+//     fn load_word_embeddings() -> Result<HashMap<String, Vec<f32>>> {
+//         let embeddings = [
+//             ("hello", [0.1, 0.2, 0.3, 0.4, 0.5]),
+//             ("world", [0.4, 0.5, 0.6, 0.7, 0.8]),
+//             ("rust", [0.3, 0.6, 0.1, 0.9, 0.7]),
+//             ("language", [0.8, 0.3, 0.4, 0.6, 0.2]),
+//         ]
+//         .iter()
+//         .map(|(k, v)| (k.to_string(), v.to_vec()))
+//         .collect();
+//         Ok(embeddings)
+//     }
+
+//     /// Generates an embedding for a given text
+//     pub fn embed(&self, text: &str) -> Result<Vec<f32>> {
+//         let tokens: Vec<String> = text.split_whitespace().map(|t| t.to_lowercase()).collect();
+//         let embeddings: Vec<Vec<f32>> = tokens
+//             .iter()
+//             .filter_map(|token| self.word_embeddings.get(token))
+//             .cloned()
+//             .collect();
+        
+//         if embeddings.is_empty() {
+//             return Ok(vec![0.0, 0.0, 0.0, 0.0, 0.5]); // Default embedding
+//         }
+
+//         let embedding_dim = embeddings[0].len();
+//         let avg_embedding = (0..embedding_dim)
+//             .map(|i| embeddings.iter().map(|vec| vec[i]).sum::<f32>() / embeddings.len() as f32)
+//             .collect();
+        
+//         Ok(avg_embedding)
+//     }
+
+//     /// Extracts text from a PDF file
+//     pub fn extract_text_from_pdf(pdf_path: &str) -> Result<String> {
+//         let doc = Document::load(pdf_path)?;
+//         let mut text = String::new();
+        
+//         for &page_id in doc.get_pages().keys().collect::<Vec<_>>().iter().sorted() {
+//             if let Ok(content) = doc.extract_text(&[*page_id]) {
+//                 text.push_str(&content);
+//                 text.push('\n');
+//             }
+//         }
+        
+//         Ok(text)
+//     }
+// }
+
+// /// In-memory vector database
+// pub struct VectorStore {
+//     documents: HashMap<String, Vec<f32>>,
+// }
+
+// impl VectorStore {
+//     /// Creates a new empty VectorStore
+//     pub fn new() -> Self {
+//         Self { documents: HashMap::new() }
+//     }
+
+//     /// Adds a document embedding and returns its unique ID
+//     pub fn add_document(&mut self, embedding: Vec<f32>) -> String {
+//         let id = Uuid::new_v4().to_string();
+//         self.documents.insert(id.clone(), embedding);
+//         id
+//     }
+
+//     /// Retrieves a stored vector by document ID
+//     pub fn get_vector(&self, doc_id: &str) -> Option<&Vec<f32>> {
+//         self.documents.get(doc_id)
+//     }
+
+//     /// Adds a PDF file to the vector store
+//     pub fn add_pdf_to_vectorstore(&mut self, model: &EmbeddingModel, pdf_path: &str) -> Result<String> {
+//         let extracted_text = EmbeddingModel::extract_text_from_pdf(pdf_path)?;
+//         let embedding = model.embed(&extracted_text)?;
+//         let doc_id = self.add_document(embedding);
+//         Ok(doc_id)
+//     }
+
+//     /// Saves stored vectors to a CSV file
+//     pub fn save_vectors_to_csv(&self, filename: &str) -> Result<()> {
+//         let mut file = File::create(filename)?;
+//         writeln!(file, "id,dim1,dim2,dim3,dim4,dim5")?;
+//         for (id, vector) in &self.documents {
+//             let vector_str = vector.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",");
+//             writeln!(file, "{},{}", id, vector_str)?;
+//         }
+//         Ok(())
+//     }
+// }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use std::fs;
+
+//     #[test]
+//     fn test_embedding_generation() -> Result<()> {
+//         let model = EmbeddingModel::new()?;
+//         let embedding = model.embed("Hello world")?;
+//         assert_eq!(embedding.len(), 5);
+//         Ok(())
+//     }
+
+//     #[test] 
+//     fn test_pdf_extraction() -> Result<()> {
+//         let pdf_path = "/home/kyomoto/Downloads/rag.pdf";
+//         let extracted_text = EmbeddingModel::extract_text_from_pdf(pdf_path)?;
+//         assert!(!extracted_text.is_empty(), "Extracted text should not be empty");
+//         Ok(())
+//     }
+
+//     #[test]
+//     fn test_pdf_to_vectorstore() -> Result<()> {
+//         let pdf_path = "/home/kyomoto/Downloads/rag.pdf";
+//         let model = EmbeddingModel::new()?;
+//         let mut vector_store = VectorStore::new();
+//         let doc_id = vector_store.add_pdf_to_vectorstore(&model, pdf_path)?;
+//         assert!(vector_store.get_vector(&doc_id).is_some(), "Vector should be stored");
+//         vector_store.save_vectors_to_csv("/home/kyomoto/Downloads/vectors.csv")?;
+//         Ok(())
+//     }
+// }
