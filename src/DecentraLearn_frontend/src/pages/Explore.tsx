@@ -18,7 +18,7 @@ export default function Explore() {
     {
       _id: 2,
       slug: "web3-development",
-      image: "/images/web3.jpg",
+      image: "/web3.png",
       title: "Web3 Development",
       description: "Build decentralized apps with Ethereum",
       category: { name: "Development" },
@@ -29,7 +29,7 @@ export default function Explore() {
     {
       _id: 3,
       slug: "smart-contracts",
-      image: "/images/smart-contracts.jpg",
+      image: "/smart.png",
       title: "Smart Contracts",
       description: "Master the art of writing smart contracts",
       category: { name: "Blockchain" },
