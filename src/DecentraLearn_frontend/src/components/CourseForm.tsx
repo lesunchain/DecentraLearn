@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Upload } from "lucide-react"
+import { DecentraLearn_backend } from "./../../../declarations/DecentraLearn_backend"
 
 export default function CourseForm() {
   const navigate = useNavigate()
@@ -76,6 +77,33 @@ export default function CourseForm() {
     setIsLoading(true)
 
     try {
+
+      // Convert category string into CourseTopic variant (ICP uses variants)
+      const courseTopic = (() => {
+        switch (formData.category.toLowerCase()) {
+          case "technology": return { Technology: null };
+          case "business": return { Business: null };
+          case "design": return { Design: null };
+          case "marketing": return { Marketing: null };
+          case "development": return { Development: null };
+          default: return { Other: null };
+        }
+      })();
+
+      // Prepare course data for backend
+      const courseData = {
+        course_name: formData.title,
+        course_topics: courseTopic,
+        course_desc: formData.description,
+        course_image_link: formData.image ? URL.createObjectURL(formData.image) : "",
+        course_slug: formData.slug,
+      };
+
+      // Call the backend function
+      const resp = await DecentraLearn_backend.add_course(courseData);
+
+      console.log("Backend response (new course ID):", resp);
+
       // In a real app, you'd send this data to your API
       console.log("Submitting course:", formData)
 
@@ -84,8 +112,7 @@ export default function CourseForm() {
 
       // Navigate to the modules page for this course
       // In a real app, you'd get the ID from the API response
-      const mockId = Date.now().toString()
-      navigate(`/admin/courses/${mockId}/modules`)
+      navigate(`/admin/courses/${formData.slug}`)
     } catch (error) {
       console.error("Error creating course:", error)
     } finally {
@@ -190,4 +217,3 @@ export default function CourseForm() {
     </form>
   )
 }
-

@@ -480,7 +480,7 @@ export default function CourseModulesPage() {
                 <Button type="button" variant="outline" onClick={() => setIsEditingModule(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit" className="text-black">Save Changes</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -561,7 +561,7 @@ export default function CourseModulesPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Add Lesson</Button>
+                <Button type="submit" className="text-black">Add Lesson</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -587,7 +587,7 @@ export default function CourseModulesPage() {
                 handleEditLesson(data)
               }}
             >
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 py-4 h-90 overflow-y-auto [&::-webkit-scrollbar]:hidden">
                 <div className="grid gap-2">
                   <Label htmlFor="title">Lesson Title</Label>
                   <Input
@@ -646,7 +646,7 @@ export default function CourseModulesPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit" className="text-black">Save Changes</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -696,4 +696,3 @@ export default function CourseModulesPage() {
     </div>
   )
 }
-

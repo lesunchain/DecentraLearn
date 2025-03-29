@@ -1,36 +1,53 @@
 import Hero from "../components/Hero";
+import { useState, useEffect } from "react";
 import { CourseCard } from "../components/CourseCard";
+import { DecentraLearn_backend } from "../../../declarations/DecentraLearn_backend";
+
+interface Course {
+  _id: number;
+  slug: string;
+  image: string;
+  title: string;
+  description: string;
+  category: { name: string };
+  price: number;
+  instructor: { photo: string; name: string };
+}
 
 export default function Explore() {
-  // In your Explore component
-  const courses = [
-    {
-      _id: 1, // Required for key prop
-      slug: "blockchain-basics", // Required for URL
-      image: "/images/blockchain.jpg",
-      title: "Blockchain Basics",
-      description: "Learn the fundamentals of blockchain technology",
-      category: { name: "Technology" },
-      price: 100,
-      instructor: {
-        photo: "/images/instructor-john.jpg",
-        name: "John Doe",
-      },
-    },
-    {
-      _id: 2,
-      slug: "web3-development",
-      image: "/images/web3.jpg",
-      title: "Web3 Development",
-      description: "Build decentralized apps with Ethereum",
-      category: { name: "Development" },
-      price: 150,
-      instructor: {
-        photo: "/images/instructor-jane.jpg",
-        name: "Jane Smith",
-      },
-    },
-  ];
+
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+
+        const fetchedCourses = await DecentraLearn_backend.get_courses();
+        console.log("Fetched Courses:", fetchedCourses);
+        
+        // Transform backend data to match the frontend structure
+        const formattedCourses = fetchedCourses.map((entry) => ({
+          _id: entry.course_id,
+          slug: entry.course.course_slug, // Use course_slug from backend
+          image: entry.course.course_image_link || "/images/default-course.jpg",
+          title: entry.course.course_name,
+          description: entry.course.course_desc,
+          category: { name: entry.course.course_topics.toString() }, // Convert enum to string
+          price: 100, // Placeholder price (update based on your backend)
+          instructor: {
+            photo: "/images/default-instructor.jpg", // Placeholder
+            name: "Instructor Name", // Placeholder, update if backend provides this
+          },
+        }));
+
+        setCourses(formattedCourses);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    }
+
+    fetchCourses();
+  }, []);
 
   return (
     <div className="text-white min-h-screen">
