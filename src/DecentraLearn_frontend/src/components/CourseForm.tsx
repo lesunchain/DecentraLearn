@@ -112,8 +112,7 @@ export default function CourseForm() {
 
       // Navigate to the modules page for this course
       // In a real app, you'd get the ID from the API response
-      const mockId = Date.now().toString()
-      navigate(`/admin/courses/${mockId}/modules`)
+      navigate(`/admin/courses/${formData.slug}`)
     } catch (error) {
       console.error("Error creating course:", error)
     } finally {
