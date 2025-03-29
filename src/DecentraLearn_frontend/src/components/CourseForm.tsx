@@ -93,17 +93,17 @@ export default function CourseForm() {
       // Prepare course data for backend
       const courseData = {
         course_name: formData.title,
-        course_topics: [courseTopic], // `vec` in ICP means an array in TypeScript
+        course_topics: courseTopic,
         course_desc: formData.description,
         course_image_link: formData.image ? URL.createObjectURL(formData.image) : "",
-        course_estimated_time_in_hours: 5, // Default estimated time (change as needed)
+        course_slug: formData.slug,
       };
 
       // Call the backend function
       const resp = await DecentraLearn_backend.add_course(courseData);
 
       console.log("Backend response (new course ID):", resp);
-      
+
       // In a real app, you'd send this data to your API
       console.log("Submitting course:", formData)
 
