@@ -40,7 +40,7 @@ pub fn update_current_module(course_id: u32, module_id: u32) -> bool {
     let key = (user_id, course_id);
     
     let modules = get_course_modules(course_id);
-    let valid_module = modules.iter().any(|m| m.id == module_id);
+    let valid_module = modules.iter().any(|m| m.module_id == module_id);
     
     if !valid_module {
         return false;
@@ -59,16 +59,16 @@ pub fn complete_module(course_id: u32, module_id: u32) -> bool {
     let user_id = caller();
     let key = (user_id, course_id);
     let modules = get_course_modules(course_id);
-    let valid_module = modules.iter().any(|m| m.id == module_id);
+    let valid_module = modules.iter().any(|m| m.module_id == module_id);
     
     if !valid_module {
         return false;
     }
-    let current_module_index = modules.iter().position(|m| m.id == module_id);
+    let current_module_index = modules.iter().position(|m| m.module_id == module_id);
     if let Some(index) = current_module_index {
         if index + 1 < modules.len() {
             let next_module = &modules[index + 1];
-            update_current_module(course_id, next_module.id);
+            update_current_module(course_id, next_module.module_id);
         }
     }
     
@@ -112,7 +112,7 @@ pub fn is_course_completed(course_id: u32) -> bool {
         return false;
     }
     
-    modules.iter().all(|m| completed.contains(&m.id))
+    modules.iter().all(|m| completed.contains(&m.module_id))
 }
 
 // Initialize progress course
@@ -126,7 +126,7 @@ pub fn initialize_course_progress(course_id: u32) -> bool {
     }
     
     // Set current module ke 1
-    let first_module = modules.first().map(|m| m.id).unwrap_or(1);
+    let first_module = modules.first().map(|m| m.module_id).unwrap_or(1);
     
     USER_PROGRESS.with(|progress| {
         // Init hanya jika belum enrolled
