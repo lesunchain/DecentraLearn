@@ -1,6 +1,8 @@
+type CourseTopic = variant { Technology; Business; Design; Marketing; Development; Other };
+
 type Course = record {
     course_name: text;
-    course_topics: vec text;
+    course_topics: vec CourseTopic;
     course_desc: text;
     course_image_link: text;
     course_estimated_time_in_hours: nat32;
