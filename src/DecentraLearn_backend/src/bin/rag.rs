@@ -5,6 +5,7 @@ use std::io::{Write, BufWriter};
 use anyhow::{Result, Context};
 use pdf_extract::extract_text;
 use regex::Regex;
+use pdfium_render::prelude::*;
 
 struct RAGSystem {
     document_store: HashMap<String, String>,
@@ -110,6 +111,33 @@ impl RAGSystem {
         // If no processed file or no match found
         Ok(String::new())
     }
+
+    pub fn retrieve_img(&self, pdf_path: &str, output_dir: &str) -> Result<()> {
+        // Initialize the Pdfium library
+        let pdfium = Pdfium::new(Pdfium::bind_to_system_library()?);
+
+        // Load the PDF document
+        let document = pdfium.load_pdf_from_file(pdf_path, None)
+            .context(format!("Failed to load PDF: {}", pdf_path))?;
+
+        // Iterate through each page and render it as an image
+        for (page_index, page) in document.pages().iter().enumerate() {
+            let bitmap = page.render(1080, 1920, None) // Render the page with width, height, and no rotation
+                .context(format!("Failed to render page {}", page_index))?;
+
+            // Convert the PdfBitmap to an image::DynamicImage
+            let image = bitmap.as_image();
+
+            // Save the image to the output directory
+            let output_path = format!("{}/page_{}.png", output_dir, page_index + 1);
+            image.save(&output_path)
+                .context(format!("Failed to save image for page {}: {}", page_index, output_path))?;
+
+            println!("Saved page {} as image: {}", page_index + 1, output_path);
+        }
+
+        Ok(())
+    }
 }
 
 #[tokio::main]
@@ -117,10 +145,18 @@ async fn main() -> Result<()> {
     let mut rag_system = RAGSystem::new();
     let pdf_path = "/home/kyomoto/Decentralearn/src/rag.pdf";
     let output_path = "processed.txt";
-    
+    let output_dir = "src/DecentraLearn_backend/src/bin"; // Define the output directory for images
+
+    // Process the PDF and extract text
     match rag_system.add_pdf_document(pdf_path, output_path) {
         Ok(_) => println!("PDF document processed and saved to {}", output_path),
         Err(e) => eprintln!("Error processing PDF document: {}", e),
+    }
+
+    // Convert PDF to images
+    match rag_system.retrieve_img(pdf_path, output_dir) {
+        Ok(_) => println!("PDF pages saved as images in {}", output_dir),
+        Err(e) => eprintln!("Error converting PDF to images: {}", e),
     }
 
     let query = "Siapakah Michael Harditya";
