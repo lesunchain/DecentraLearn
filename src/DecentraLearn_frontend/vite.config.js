@@ -9,6 +9,9 @@ dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
   build: {
+    rollupOptions: {
+      external: ["@dfinity/identity", "@noble/hashes"]
+    },
     emptyOutDir: true,
   },
   optimizeDeps: {
