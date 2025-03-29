@@ -18,7 +18,6 @@ pub struct Course {
     pub course_slug: String,
     pub course_desc: String,
     pub course_image_link: String,
-    pub course_estimated_time_in_hours: u32,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
