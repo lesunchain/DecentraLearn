@@ -1,96 +1,211 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, UserIcon } from "lucide-react";
 import EnrollButton from "../components/EnrollButton";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { DecentraLearn_backend } from "../../../declarations/DecentraLearn_backend";
+
+// Types based on backend structures
+interface BackendCourse {
+    course_name: string;
+    course_topics: { [key: string]: null }; // Variant type handling
+    course_slug: string;
+    course_desc: string;
+    course_image_link: string;
+}
+
+interface BackendModule {
+    title: string;
+    description: string;
+    order: number;
+    course_id: number;
+}
+
+interface BackendLesson {
+    title: string;
+    description: string;
+    pdf_file: string;
+    module_id: number;
+}
+
+// Backend entry types
+interface CourseEntry {
+    course_id: number;
+    course: BackendCourse;
+}
+
+interface ModuleEntry {
+    module_id: number;
+    module: BackendModule;
+}
+
+interface LessonEntry {
+    lesson_id: number;
+    lesson: BackendLesson;
+}
+
+// Frontend-friendly shapes
+interface Course {
+    _id: number;
+    slug: string;
+    image: string;
+    title: string;
+    description: string;
+    category: { name: string };
+    instructor?: {
+        name: string;
+        bio: string;
+    };
+    modules: Module[];
+}
+
+interface Module {
+    _id: number;
+    title: string;
+    lessons: Lesson[];
+}
+
+interface Lesson {
+    _id: number;
+    title: string;
+}
+
+// Mock instructor data since it's not in the backend yet
+const INSTRUCTORS: Record<string, { name: string; bio: string }> = {
+    "blockchain-basics": {
+        name: "John Doe",
+        bio: "Blockchain expert with 10+ years of experience"
+    },
+    "web3-development": {
+        name: "Jane Smith",
+        bio: "Full-stack Web3 developer and educator"
+    }
+};
+
+// Mock enrollment type
+interface Enrollment {
+    userId: string;
+    courseId: number;
+}
 
 export default function CoursePage() {
-    const courses = [
-        {
-            _id: 1, // Required for key prop
-            slug: "blockchain-basics", // Required for URL
-            image: "/images/blockchain.jpg",
-            title: "Blockchain Basics",
-            description: "Learn the fundamentals of blockchain technology",
-            category: { name: "Technology" },
-            instructor: {
-                name: "John Doe",
-                bio: "Blockchain expert with 10+ years of experience"
-            },
-            modules: [
-                {
-                    _id: 101,
-                    title: "Introduction to Blockchain",
-                    lessons: [
-                        { _id: 1001, title: "What is Blockchain?" },
-                        { _id: 1002, title: "Blockchain Architecture" },
-                        { _id: 1003, title: "Consensus Mechanisms" }
-                    ]
-                },
-                {
-                    _id: 102,
-                    title: "Cryptocurrencies",
-                    lessons: [
-                        { _id: 1004, title: "Bitcoin Fundamentals" },
-                        { _id: 1005, title: "Ethereum and Smart Contracts" },
-                        { _id: 1006, title: "Altcoins and Tokenomics" }
-                    ]
-                }
-            ]
-        },
-        {
-            _id: 2,
-            slug: "web3-development",
-            image: "/images/web3.jpg",
-            title: "Web3 Development",
-            description: "Build decentralized apps with Ethereum",
-            category: { name: "Development" },
-            instructor: {
-                name: "Jane Smith",
-                bio: "Full-stack Web3 developer and educator"
-            },
-            modules: [
-                {
-                    _id: 201,
-                    title: "Web3 Fundamentals",
-                    lessons: [
-                        { _id: 2001, title: "Introduction to Web3" },
-                        { _id: 2002, title: "Setting Up Your Environment" }
-                    ]
-                },
-                {
-                    _id: 202,
-                    title: "Smart Contract Development",
-                    lessons: [
-                        { _id: 2003, title: "Solidity Basics" },
-                        { _id: 2004, title: "Creating Your First Smart Contract" },
-                        { _id: 2005, title: "Testing and Deployment" }
-                    ]
-                }
-            ]
-        },
-    ];
-
-    const { slug } = useParams();
+    const { slug } = useParams<{ slug: string }>();
+    const [course, setCourse] = useState<Course | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
+    
+    // User ID would normally come from authentication
     const userId = "2"; // Mock user ID
 
-    const course = courses.find((course) => course.slug === slug);
+    useEffect(() => {
+        async function fetchCourseData() {
+            if (!slug) return;
+            
+            try {
+                setIsLoading(true);
+                setError(null);
 
-    // Mock enrollment data structure
-    const enrollments = [
-        { userId: "1", courseId: 1 },
-        { userId: "2", courseId: 2 },
-    ];
+                // 1. Fetch the course by slug
+                const courseResponse = await DecentraLearn_backend.get_course_by_slug(slug);
+                
+                if (!courseResponse[0]) {
+                    setError("Course not found");
+                    setIsLoading(false);
+                    return;
+                }
 
-    // Check if user is enrolled in this course
-    const isEnrolled = enrollments.some(
-        enrollment => enrollment.userId === userId &&
-            enrollment.courseId === course?._id
-    );
+                // 2. Get course ID (needed to fetch modules)
+                const courses = await DecentraLearn_backend.get_courses();
+                const courseEntry = courses.find((c: CourseEntry) => c.course.course_slug === slug);
+                
+                if (!courseEntry) {
+                    setError("Course ID not found");
+                    setIsLoading(false);
+                    return;
+                }
 
-    if (!course) {
+                const courseId = courseEntry.course_id;
+
+                // 3. Get modules for this course
+                const moduleEntries = await DecentraLearn_backend.get_course_modules(courseId);
+                
+                // 4. For each module, fetch its lessons
+                const modulesWithLessons = await Promise.all(
+                    moduleEntries.map(async (moduleEntry: ModuleEntry) => {
+                        const lessonEntries = await DecentraLearn_backend.get_module_lessons(moduleEntry.module_id);
+                        
+                        // Transform lesson entries to match our UI format
+                        const lessons = lessonEntries.map((lessonEntry: LessonEntry) => ({
+                            _id: lessonEntry.lesson_id,
+                            title: lessonEntry.lesson.title
+                        }));
+                        
+                        return {
+                            _id: moduleEntry.module_id,
+                            title: moduleEntry.module.title,
+                            lessons
+                        };
+                    })
+                );
+
+                // 5. Extract category name from course topics (variant type)
+                const topicKey = Object.keys(courseEntry.course.course_topics)[0] || "Other";
+                
+                // 6. Construct the complete course object for our UI
+                const transformedCourse: Course = {
+                    _id: courseId,
+                    slug: courseEntry.course.course_slug,
+                    image: courseEntry.course.course_image_link,
+                    title: courseEntry.course.course_name,
+                    description: courseEntry.course.course_desc,
+                    category: { name: topicKey },
+                    instructor: INSTRUCTORS[slug] || {
+                        name: "Course Instructor",
+                        bio: "Expert in the field"
+                    },
+                    modules: modulesWithLessons.sort((a: Module, b: Module) => {
+                        const moduleA = moduleEntries.find((m: ModuleEntry) => m.module_id === a._id)?.module;
+                        const moduleB = moduleEntries.find((m: ModuleEntry) => m.module_id === b._id)?.module;
+                        return (moduleA?.order || 0) - (moduleB?.order || 0);
+                    })
+                };
+
+                setCourse(transformedCourse);
+
+                // 7. Check enrollment (would come from backend in real implementation)
+                // TODO: Replace with actual backend call when enrollment API is ready
+                const mockEnrollments: Enrollment[] = [
+                    { userId: "1", courseId: 1 },
+                    { userId: "2", courseId: 2 },
+                ];
+                setIsEnrolled(mockEnrollments.some(
+                    (enrollment: Enrollment) => enrollment.userId === userId && enrollment.courseId === courseId
+                ));
+                
+            } catch (err) {
+                console.error("Error fetching course data:", err);
+                setError("Failed to load course. Please try again later.");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchCourseData();
+    }, [slug, userId]);
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto px-4 py-8 mt-16">
+                <p className="text-xl">Loading course...</p>
+            </div>
+        );
+    }
+
+    if (error || !course) {
         return (
             <div className="container mx-auto px-4 py-8 mt-16">
                 <h1 className="text-4xl font-bold">Course not found</h1>
+                {error && <p className="mt-4 text-red-500">{error}</p>}
             </div>
         );
     }
@@ -131,7 +246,11 @@ export default function CoursePage() {
                             </p>
                         </div>
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 md:min-w-[300px]">
-                            <EnrollButton slug={course.slug} lessonId={1} isEnrolled={isEnrolled} />
+                            <EnrollButton 
+                                slug={course.slug} 
+                                lessonId={course.modules[0]?.lessons[0]?._id || 1} 
+                                isEnrolled={isEnrolled} 
+                            />
                         </div>
                     </div>
                 </div>
@@ -188,9 +307,9 @@ export default function CoursePage() {
                             {course.instructor && (
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
-                                            <div className="relative h-12 w-12 flex items-center justify-center">
-                                                <UserIcon className="h-8 w-8" />
-                                            </div>
+                                        <div className="relative h-12 w-12 flex items-center justify-center">
+                                            <UserIcon className="h-8 w-8" />
+                                        </div>
                                         <div>
                                             <div className="font-medium">
                                                 {course.instructor.name}
