@@ -2,13 +2,13 @@
 
 # DecentraLearn 📚
 
-DecentraLearn is a decentralized e-learning platform built on the Internet Computer Protocol (ICP) that empowers users to create, enroll, and progress through structured courses powered by Web3 technology. It integrates smart contracts (Rust canisters), Internet Identity authentication, and a modern React-based frontend.
+DecentraLearn is a decentralized e-learning platform built on the Internet Computer Protocol (ICP) that empowers users to create, enroll, and progress through structured courses powered by Web3 technology. It integrates smart contracts (Rust canisters), Internet Identity authentication, Llama 3.1 LLM canister, and a modern frontend built with React and TailwindCSS.
 
 ## Demo Video 🎥
 
 [Watch here!](https://youtu.be/ZLrLtmprAMs)
 
-## Key Features
+## Key Features ✨
 
 * **Internet Identity Authentication:** Secure and seamless login using ICP's native authentication system.
 * **Course Creation (Admin):** Admins can create courses with metadata such as title, description, image, and category.
@@ -35,7 +35,7 @@ dfx help
 dfx canister --help
 ```
 
-## Running the Project Locally
+## Running the Project Locally 🖥️
 
 If you want to test your project locally, you can use the following commands:
 
@@ -80,7 +80,7 @@ ollama pull llama3.1:8b
 
 You can then do `dfx deploy` in another terminal to deploy the canisters and start the server.
 
-## Tech Stack
+## Tech Stack 🛠️
 
 * **Frontend:** React, TypeScript, TailwindCSS, ShadCN/UI  
 * **Auth:** Internet Identity (ICP native)  
@@ -88,7 +88,7 @@ You can then do `dfx deploy` in another terminal to deploy the canisters and sta
 * **Backend:** Rust, ic-cdk, Internet Computer Canisters  
 * **Dev Tools:** DFX, Vite, Recharts, Class Variance Authority  
 
-## User Roles
+## User Roles 👥
 
 ### 👥 Guest Users
 
@@ -108,30 +108,41 @@ You can then do `dfx deploy` in another terminal to deploy the canisters and sta
 * Add modules and lessons
 * View user progress analytics (charts, visualizations)
 
-## Landing Page
-
-When first visiting the site, the user has an option to explore or login. Explore will take the user to the explore page, where they can see all the available courses. The login button will redirect the user to the Internet Identity authentication page.
+## Landing Page 🌐
 
 | **Screen**         | **Description**                                                                 | **Preview**                                                                 |
 |---------------------|---------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | **Landing Page**    | The initial page where users can explore courses or log in via Internet Identity. | ![Landing Page](https://i.imgur.com/sNKjf6h.png)                           |
 | **Auth Page**       | The login page that redirects users to Internet Identity authentication.        | ![Auth Page](https://i.imgur.com/3FVsHv4.png)                              |
 | **Explore Page**    | Displays all available courses for users to browse and explore.                 | ![Explore Page](https://i.imgur.com/qaS5Fwu.png)                           |
+| **Course Page**     | Displays detailed information about a specific course, including modules and lessons. | ![Course Page](https://i.imgur.com/xvRdymE.png)                            |
+| **Lesson Page**     | Displays the content of a specific lesson within a module.                      | ![Lesson Page](https://i.imgur.com/9QP9fPd.png)                            |
 
-## Admin Page
+## Admin Page 🛠️
 
-As an admin, we have the option to view the courses, modules and students. Furthermore, an admin has the control to create new courses.
+| **Screen**                | **Description**                                                                 | **Preview**                                                                 |
+|----------------------------|---------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| **Dashboard Screen**       | Displays an overview of courses, modules, and student progress analytics.       | ![Dashboard Screen](https://i.imgur.com/kVBaIMG.png)                       |
+| **Create Courses Screen**  | Allows admins to create new courses by adding metadata like title, description, and category. | ![Create Courses Screen](https://i.imgur.com/2ybVoRy.png)                  |
+| **Admin Users Page**       | Displays a list of users with their roles and permissions.                      | ![Admin Users Page](https://i.imgur.com/82WgTL7.png)                       |
+| **Admin Courses Page**     | Displays a list of courses with options to edit or delete them.                 | ![Admin Courses Page](https://i.imgur.com/D5RPieC.png)                     |
+| **Admin Modules/Lessons Page** | Displays modules and lessons within a course, with options to manage them.      | ![Admin Modules/Lessons Page](https://i.imgur.com/23wlhk7.png)             |
 
-| **Screen**            | **Description**                                                                 | **Preview**                                                                 |
-|------------------------|---------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| **Dashboard Screen**   | Displays an overview of courses, modules, and student progress analytics.       | ![Dashboard Screen](https://i.imgur.com/kVBaIMG.png)                       |
-| **Create Courses Screen** | Allows admins to create new courses by adding metadata like title, description, and category. | ![Create Courses Screen](https://i.imgur.com/2ybVoRy.png)                  |
+## AI Functionality 🤖
 
-## Backend Functionality
+The AI functionality is integrated using the Ollama LLM Canister. It uses the Llama 3.1 model to answer questions and provide helpful responses. The AI exists in chatbot form, where users can ask questions on a variety of topics. Below is a picture of the AI functionality in action:
+
+| Input | Screenshot Output |
+|-------|------------------|
+| Hello | ![picture 6](https://i.imgur.com/KhD2dfn.png) |
+| Tell me a joke | ![picture 9](https://i.imgur.com/SFUL9wg.png) |
+| I like apple | ![picture 10](https://i.imgur.com/xdilguM.png) |
+
+## Backend Functionality ⚙️
 
 The backend is built using Rust and the Internet Computer SDK. It provides the following functionalities:
 
-### Course Management
+### Course Management 📋
 
 | **Function**                          | **Description**                                                                 |
 |---------------------------------------|---------------------------------------------------------------------------------|
@@ -140,7 +151,7 @@ The backend is built using Rust and the Internet Computer SDK. It provides the f
 | `get_course(course_id: nat32): Course` | Retrieves details of a specific course by its ID.                              |
 | `get_courses(): CourseEntry[]`        | Retrieves a list of all available courses.                                     |
 
-### Module & Lesson Management
+### Module & Lesson Management 🗂️
 
 | **Function**                          | **Description**                                                                 |
 |---------------------------------------|---------------------------------------------------------------------------------|
