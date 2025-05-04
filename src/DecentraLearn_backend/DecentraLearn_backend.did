@@ -42,6 +42,22 @@ type ChatMessage = record {
     content: text;
 };
 
+type ModuleProgress = record {
+    module_id: nat32;
+    completed: bool;
+    last_accessed: nat64;
+};
+
+type Enrollment = record {
+    user_id: principal;
+    course_id: nat32;
+    enrolled_date: nat64;
+    last_accessed_date: nat64;
+    current_module_id: nat32;
+    modules_progress: vec ModuleProgress;
+    completed: bool;
+};
+
 service : {
     greet: (text) -> (text) query;
     whoami: () -> (principal) query;
@@ -67,4 +83,9 @@ service : {
     get_lesson_count: (nat32) -> (nat32) query;
     prompt: (text) -> (text);
     chat: (vec ChatMessage) -> (text);
+    get_enrollments: () -> (vec Enrollment) query;
+    get_enrollment_count: () -> (nat32) query;
+    enroll_student: (nat32) -> (bool);
+    get_course_enrollments: (nat32) -> (vec Enrollment) query;
+    initialize_course_progress: (nat32) -> (bool);
 }

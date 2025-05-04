@@ -1,55 +1,157 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "./ui/card"
 import { Button } from "./ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { DecentraLearn_backend } from "../../../declarations/DecentraLearn_backend"
 
-// Generate mock data for the chart
-const generateMockData = (days: number, startValue: number, trend: "up" | "down" | "stable") => {
-  const data = []
-  let currentValue = startValue
-
-  const today = new Date()
-
-  for (let i = days; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(today.getDate() - i)
-
-    // Generate a random change based on the trend
-    let change = 0
-    if (trend === "up") {
-      change = Math.floor(Math.random() * 15) + 5 // 5-20 increase
-    } else if (trend === "down") {
-      change = -Math.floor(Math.random() * 10) - 1 // 1-10 decrease
-    } else {
-      change = Math.floor(Math.random() * 10) - 5 // -5 to 5 change
-    }
-
-    currentValue = Math.max(0, currentValue + change)
-
-    data.push({
-      date: date.toISOString().split("T")[0],
-      students: currentValue,
-    })
-  }
-
-  return data
+// Type definitions for our data structures
+interface EnrollmentData {
+  date: string;
+  students: number;
 }
 
-// Generate different datasets for different time periods
-const mockData = {
-  "7d": generateMockData(7, 1180, "up"),
-  "30d": generateMockData(30, 1000, "up"),
-  "90d": generateMockData(90, 800, "up"),
-  "1y": generateMockData(365, 500, "up"),
+interface EnrollmentStats {
+  newStudents: number;
+  completionRate: number;
+  averageSessionMinutes: number;
+  activeStudents: number;
+  growthRates: {
+    newStudents: number;
+    completionRate: number;
+    averageSession: number;
+    activeStudents: number;
+  }
 }
 
 export default function EnrollmentChart() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d")
+  const [courseFilter, setCourseFilter] = useState<string>("all")
+  const [enrollmentData, setEnrollmentData] = useState<EnrollmentData[]>([])
+  const [stats, setStats] = useState<EnrollmentStats | null>(null)
+  const [courses, setCourses] = useState<{id: number, name: string}[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const data = mockData[timeRange]
+  // Fetch enrollment data based on the selected time range and course filter
+  useEffect(() => {
+    async function fetchEnrollmentData() {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // 1. Fetch all enrollments
+        const enrollments = await DecentraLearn_backend.get_enrollments()
+        
+        // 2. Fetch courses for the filter dropdown
+        const coursesData = await DecentraLearn_backend.get_courses()
+        setCourses(coursesData.map(course => ({
+          id: course.course_id,
+          name: course.course.course_name
+        })))
+
+        // 3. Process enrollments to create time-series data
+        const today = new Date()
+        const startDate = new Date()
+        
+        // Set the start date based on the selected time range
+        if (timeRange === "7d") startDate.setDate(today.getDate() - 7)
+        else if (timeRange === "30d") startDate.setDate(today.getDate() - 30)
+        else if (timeRange === "90d") startDate.setDate(today.getDate() - 90)
+        else if (timeRange === "1y") startDate.setDate(today.getDate() - 365)
+        
+        // Create a map to track enrollments by date
+        const enrollmentsByDate = new Map<string, number>()
+        
+        // Initialize the map with all dates in the selected range
+        for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0]
+          enrollmentsByDate.set(dateStr, 0)
+        }
+        
+        // Count enrollments by date, filtering by course if needed
+        enrollments.forEach(enrollment => {
+          // Convert enrollment date from nanoseconds to milliseconds and create Date
+          const enrollmentDate = new Date(Number(enrollment.enrolled_date) / 1000000)
+          
+          // Skip if outside the selected time range
+          if (enrollmentDate < startDate) return
+          
+          // Skip if filtering by course and this enrollment is for a different course
+          if (courseFilter !== "all" && enrollment.course_id.toString() !== courseFilter) return
+          
+          const dateStr = enrollmentDate.toISOString().split('T')[0]
+          const currentCount = enrollmentsByDate.get(dateStr) || 0
+          enrollmentsByDate.set(dateStr, currentCount + 1)
+        })
+        
+        // Convert the map to an array of data points for the chart
+        const chartData: EnrollmentData[] = []
+        let cumulativeCount = 0
+        
+        // Sort dates and create cumulative enrollment count
+        Array.from(enrollmentsByDate.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .forEach(([date, count]) => {
+            cumulativeCount += count
+            chartData.push({
+              date,
+              students: cumulativeCount
+            })
+          })
+        
+        setEnrollmentData(chartData)
+        
+        // 4. Calculate statistics
+        const completedEnrollments = enrollments.filter(e => e.completed)
+        const newStudents = enrollments.filter(e => {
+          const enrollmentDate = new Date(Number(e.enrolled_date) / 1000000)
+          return enrollmentDate >= startDate
+        }).length
+        
+        // Active students (had activity in the last 7 days)
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(today.getDate() - 7)
+        const activeStudents = enrollments.filter(e => {
+          const lastAccessDate = new Date(Number(e.last_accessed_date) / 1000000)
+          return lastAccessDate >= sevenDaysAgo
+        }).length
+        
+        // Calculate completion rate
+        const completionRate = enrollments.length > 0 
+          ? (completedEnrollments.length / enrollments.length) * 100 
+          : 0
+        
+        // For now, use a placeholder for average session time
+        // In a real app, you'd track session durations in your backend
+        const averageSessionMinutes = 25
+        
+        // Growth rates - placeholders that would be calculated by comparing to previous periods
+        setStats({
+          newStudents,
+          completionRate,
+          averageSessionMinutes,
+          activeStudents,
+          growthRates: {
+            newStudents: 12,
+            completionRate: 5,
+            averageSession: 8,
+            activeStudents: 15
+          }
+        })
+        
+      } catch (error) {
+        console.error("Error fetching enrollment data:", error)
+        setError("Failed to load enrollment data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEnrollmentData()
+  }, [timeRange, courseFilter])
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -57,6 +159,14 @@ export default function EnrollmentChart() {
       month: "short",
       day: "numeric",
     }).format(date)
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-[300px]">Loading enrollment data...</div>
+  }
+
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>
   }
 
   return (
@@ -98,15 +208,20 @@ export default function EnrollmentChart() {
         </div>
 
         <div className="flex items-center gap-2 text-white">
-          <Select defaultValue="all">
+          <Select 
+            value={courseFilter} 
+            onValueChange={(value) => setCourseFilter(value)}
+          >
             <SelectTrigger className="h-8 w-[150px] bg-background border-border">
               <SelectValue placeholder="All Courses" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Courses</SelectItem>
-              <SelectItem value="blockchain">Blockchain</SelectItem>
-              <SelectItem value="development">Development</SelectItem>
-              <SelectItem value="design">Design</SelectItem>
+              {courses.map(course => (
+                <SelectItem key={course.id} value={course.id.toString()}>
+                  {course.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -115,7 +230,7 @@ export default function EnrollmentChart() {
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={enrollmentData}
             margin={{
               top: 5,
               right: 5,
@@ -186,11 +301,10 @@ export default function EnrollmentChart() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-white">New Students</div>
             <div className="text-2xl font-bold text-white">
-              +{timeRange === "7d" ? "54" : timeRange === "30d" ? "234" : timeRange === "90d" ? "512" : "734"}
+              +{stats?.newStudents || 0}
             </div>
             <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
-              <span>↑</span>{" "}
-              {timeRange === "7d" ? "12%" : timeRange === "30d" ? "18%" : timeRange === "90d" ? "24%" : "32%"}
+              <span>↑</span> {stats?.growthRates.newStudents || 0}%
             </div>
           </CardContent>
         </Card>
@@ -199,13 +313,10 @@ export default function EnrollmentChart() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-white">Completion Rate</div>
             <div className="text-2xl font-bold text-white">
-              {timeRange === "7d" ? "68%" : timeRange === "30d" ? "72%" : timeRange === "90d" ? "65%" : "70%"}
+              {stats ? stats.completionRate.toFixed(0) : 0}%
             </div>
-            <div
-              className={`text-xs flex items-center gap-1 mt-1 ${timeRange === "90d" ? "text-red-500" : "text-green-500"}`}
-            >
-              <span>{timeRange === "90d" ? "↓" : "↑"}</span>{" "}
-              {timeRange === "7d" ? "3%" : timeRange === "30d" ? "5%" : timeRange === "90d" ? "2%" : "8%"}
+            <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
+              <span>↑</span> {stats?.growthRates.completionRate || 0}%
             </div>
           </CardContent>
         </Card>
@@ -214,11 +325,10 @@ export default function EnrollmentChart() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-white">Avg. Session</div>
             <div className="text-2xl font-bold text-white">
-              {timeRange === "7d" ? "24m" : timeRange === "30d" ? "28m" : timeRange === "90d" ? "32m" : "30m"}
+              {stats?.averageSessionMinutes || 0}m
             </div>
             <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
-              <span>↑</span>{" "}
-              {timeRange === "7d" ? "4%" : timeRange === "30d" ? "8%" : timeRange === "90d" ? "12%" : "10%"}
+              <span>↑</span> {stats?.growthRates.averageSession || 0}%
             </div>
           </CardContent>
         </Card>
@@ -227,11 +337,10 @@ export default function EnrollmentChart() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-white">Active Students</div>
             <div className="text-2xl font-bold text-white">
-              {timeRange === "7d" ? "842" : timeRange === "30d" ? "968" : timeRange === "90d" ? "1,024" : "1,156"}
+              {stats?.activeStudents || 0}
             </div>
             <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
-              <span>↑</span>{" "}
-              {timeRange === "7d" ? "6%" : timeRange === "30d" ? "9%" : timeRange === "90d" ? "15%" : "22%"}
+              <span>↑</span> {stats?.growthRates.activeStudents || 0}%
             </div>
           </CardContent>
         </Card>
@@ -239,4 +348,3 @@ export default function EnrollmentChart() {
     </div>
   )
 }
-
