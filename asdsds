@@ -1,0 +1,28 @@
+[33mf3dd12f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Integrasi
+[33m117f759[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m final readme
+[33mdce7d85[m Merge branch 'main' of https://github.com/lesunchain/DecentraLearn
+[33m99c5722[m final
+[33mb10fd3c[m Admin Courses
+[33m0d4ca58[m Explore + Img
+[33m4be51dc[m CoursePage
+[33m4f5abaa[m AdminSidebar
+[33mfd5da32[m CRUD Lesson Module
+[33ma8906bb[m Merge branch 'main' of https://github.com/lesunchain/DecentraLearn
+[33m0ab59cc[m CRUD Lesson + Module
+[33mcb8358f[m fix bugs
+[33mec9db78[m added slug to course and get function
+[33m2abc128[m Integrate add course to FE, but must modify BE to include slug and change course topics to course topic
+[33mfe27b49[m Merge branch 'main' of https://github.com/lesunchain/DecentraLearn
+[33m8e67467[m slight pull from main
+[33m4c8665f[m all interface for basic CRUD operations are already added
+[33m4a5232f[m change course topics to enum
+[33m4a6767a[m added new frontend on course and lesson
+[33m27e2eba[m added frontend for home page, course page, admin page, connect internet identity to login, updated readme
+[33m86ddfcb[m Candid Update
+[33mb7b0703[m Progress Controllers
+[33m2bed077[m[33m ([m[1;31morigin/progresstracking[m[33m)[m Progress Tracking
+[33md28a1cd[m Organize Files
+[33m57c6083[m Course CRUD Functionality should work as expected
+[33m50e316d[m Added Course CRUD Functionality, but still need to fix some bugs
+[33m23a503f[m Added Login and Logout Functionality in FE
+[33m957c0c6[m Initial Setup
