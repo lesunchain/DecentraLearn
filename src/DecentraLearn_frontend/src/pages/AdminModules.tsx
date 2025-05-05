@@ -294,20 +294,16 @@ export default function CourseModulesPage() {
     try {
       setIsLoading(true)
       
-      // Convert PDF to base64 string
-      const pdfBase64 = await convertPdfToBase64(selectedPdf)
-      
       // Create lesson object for backend
       const newLesson = {
         title: lessonData.title,
         description: lessonData.description,
-        pdf_file: pdfBase64,
+        pdf_file: pdfPreviewUrl || "",
         module_id: currentModule.module_id,
       }
       
       console.log("Adding new lesson:", {
-        ...newLesson,
-        pdf_file: pdfBase64 ? `${pdfBase64.substring(0, 30)}...` : null
+        ...newLesson
       })
       
       // Add lesson to backend
