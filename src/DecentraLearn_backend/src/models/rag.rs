@@ -7,10 +7,6 @@ use pdf_extract::extract_text;
 use regex::Regex;
 use pdfium_render::prelude::*;
 
-
-
-
-
 struct RAGSystem {
     document_store: HashMap<String, String>,
     processed_text_path: Option<String>,
